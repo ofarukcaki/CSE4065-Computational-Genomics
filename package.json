@@ -1,0 +1,11 @@
+{
+  "name": "CSE4065-ComputationalGenomics",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Ömer Faruk Çakı <omerfarukcaki@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^15.12.0",
+    "typescript": "^4.3.2"
+  }
+}
