@@ -19,11 +19,12 @@ const [firstLine, secondLine] = fs
 
 // console.log({ firstLine, secondLine });
 
+// each node on the 2D grid is _Node object
 class _Node {
-  cost: number; // path cost
-  x: number;
-  y: number;
-  from: _Node | null;
+  cost: number; // path cost until this node
+  x: number; // x coordinate on the grid
+  y: number; // y coordinate on the grid
+  from: _Node | null; // the node on the path which pointed this node
 
   constructor(cost = 0, x = 0, y = 0) {
     this.cost = cost;
@@ -34,11 +35,11 @@ class _Node {
 }
 
 class Matrix {
-  private table: Array<Array<_Node>> | undefined;
-  private first: string;
-  private second: string;
-  private path: Array<_Node> | undefined;
-  private alignedSequences: { first: string; second: string } | undefined;
+  private table: Array<Array<_Node>> | undefined; // 2D array, grid representation
+  private first: string; // first sequence string
+  private second: string; // second sequence string
+  private path: Array<_Node> | undefined; // path from start to sink
+  private alignedSequences: { first: string; second: string } | undefined; // final alignment results constructed from the solution path
 
   constructor(first: string, second: string) {
     this.first = first;
@@ -52,6 +53,7 @@ class Matrix {
     this.buildSequences();
   }
 
+  // build the base empty 2D array
   createEmptyTable(x: number, y: number) {
     let matrix = [];
     for (let i = 0; i < y; i++) {
@@ -64,6 +66,7 @@ class Matrix {
     this.table = matrix;
   }
 
+  // get the node which is on the left side of current node on the grid
   private getLeftNode = (current: _Node): _Node | null => {
     try {
       const left = this.table[current.x][current.y - 1];
@@ -73,6 +76,7 @@ class Matrix {
     }
   };
 
+  // get the node which is on the top of current node on the grid
   private getTopNode = (current: _Node): _Node | null => {
     try {
       const left = this.table[current.x - 1][current.y];
@@ -82,7 +86,8 @@ class Matrix {
     }
   };
 
-  from = (current: _Node): 'left' | 'top' | 'diagonal' => {
+  // get the previous move which resulted current position
+  private from = (current: _Node): 'left' | 'top' | 'diagonal' => {
     if (current.from.x === current.x) return 'left';
     if (current.from.y === current.y) return 'top';
     return 'diagonal';
@@ -156,6 +161,7 @@ class Matrix {
     return newNode;
   };
 
+  // iterate all the empty cells and create node for each
   calculateScores = () => {
     // calculate score for firs lines
     for (let i = 1; i < this.second.length + 1; i++) {
@@ -199,10 +205,12 @@ class Matrix {
     }
   };
 
+  // get final score for the current solution
   getScore = () => {
     return this.table[this.first.length][this.second.length].cost;
   };
 
+  // get the sink _Node
   getSink = (): _Node => {
     return this.table[this.first.length][this.second.length];
   };
@@ -218,6 +226,7 @@ class Matrix {
     this.path = pathArray.reverse();
   };
 
+  // returns the corresponding nucleodides or indels by checking the move
   private getLabel = (current: _Node): { first: string; second: string } => {
     let first = '-';
     let second = '-';
@@ -243,6 +252,7 @@ class Matrix {
     return { first, second };
   };
 
+  // using the solution path build the alligned sequences
   buildSequences = () => {
     let firstSequence = '';
     let secondSequence = '';
@@ -266,6 +276,7 @@ class Matrix {
     console.log(this.alignedSequences.second);
   };
 
+  // same with above func. but prints the colored output by matching status
   printColoredSequences = (): void => {
     const { first, second } = this.alignedSequences;
     // print first seq
@@ -279,7 +290,8 @@ class Matrix {
       }
     }
     process.stdout.write('\n');
-
+    
+    // print second seq
     for (let i = 0; i < first.length; i++) {
       if (first[i] === second[i]) {
         process.stdout.write(`${second[i]}`.green);
@@ -291,7 +303,6 @@ class Matrix {
     }
     process.stdout.write('\n');
 
-    // print second seq
   };
 
   printResult = (): void => {
