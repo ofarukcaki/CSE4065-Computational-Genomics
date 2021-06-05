@@ -1,5 +1,6 @@
 /**
- * Usage: node index <file>
+ * Compile: npm run build
+ * Usage: node ./build/index.js <file>
  */
 
 import 'colors';
@@ -19,15 +20,12 @@ const [firstLine, secondLine] = fs
 // console.log({ firstLine, secondLine });
 
 class _Node {
-  //   nucleotide: string; // A | T | C | G
   cost: number; // path cost
   x: number;
   y: number;
   from: _Node | null;
 
-  //   constructor(nucleotide: string, cost = 0) {
   constructor(cost = 0, x = 0, y = 0) {
-    // this.nucleotide = nucleotide;
     this.cost = cost;
     this.x = x;
     this.y = y;
@@ -49,6 +47,9 @@ class Matrix {
     this.createEmptyTable(this.second.length + 1, this.first.length + 1);
 
     this.calculateScores();
+
+    this.buildPath();
+    this.buildSequences();
   }
 
   createEmptyTable(x: number, y: number) {
@@ -88,7 +89,6 @@ class Matrix {
   };
 
   private getScoredNode = (x: number, y: number): _Node => {
-    // console.log({ x, y });
     const newNode = new _Node(null, x, y);
 
     // check left Node, if it is also came from its left use -0.5, use -1 otherwise
@@ -142,8 +142,6 @@ class Matrix {
       }
     } catch (error) {}
 
-    // console.log({ leftScore, topScore, diagonalScore });
-
     const maxScore = Math.max(leftScore, topScore, diagonalScore);
 
     if (maxScore === leftScore) {
@@ -154,7 +152,7 @@ class Matrix {
       newNode.from = this.table[x - 1][y - 1];
     }
     newNode.cost = maxScore;
-    // console.log({ newNode });
+
     return newNode;
   };
 
@@ -221,11 +219,10 @@ class Matrix {
   };
 
   private getLabel = (current: _Node): { first: string; second: string } => {
-    // console.log({ x: current.x, y: current.y });
     let first = '-';
     let second = '-';
 
-    const from = matrix.from(current);
+    const from = this.from(current);
 
     switch (from) {
       case 'left':
@@ -235,6 +232,7 @@ class Matrix {
       case 'top':
         first = this.first[current.x - 1];
         break;
+
       default:
         // diagonal
         second = this.second[current.y - 1];
@@ -268,9 +266,37 @@ class Matrix {
     console.log(this.alignedSequences.second);
   };
 
+  printColoredSequences = (): void => {
+    const { first, second } = this.alignedSequences;
+    // print first seq
+    for (let i = 0; i < first.length; i++) {
+      if (first[i] === second[i]) {
+        process.stdout.write(`${first[i]}`.green);
+      } else if (!(first[i] === '-' || second[i] === '-')) {
+        process.stdout.write(`${first[i]}`.red);
+      } else {
+        process.stdout.write(`${first[i]}`);
+      }
+    }
+    process.stdout.write('\n');
+
+    for (let i = 0; i < first.length; i++) {
+      if (first[i] === second[i]) {
+        process.stdout.write(`${second[i]}`.green);
+      } else if (!(first[i] === '-' || second[i] === '-')) {
+        process.stdout.write(`${second[i]}`.red);
+      } else {
+        process.stdout.write(`${second[i]}`);
+      }
+    }
+    process.stdout.write('\n');
+
+    // print second seq
+  };
+
   printResult = (): void => {
-    this.printAlignedSequences();
-    console.log('Score:', this.getScore());
+    this.printColoredSequences();
+    console.log('Score:', this.getScore(), '\n');
   };
 
   // save the table into a file
@@ -284,8 +310,6 @@ class Matrix {
 
 const matrix = new Matrix(firstLine, secondLine);
 
-matrix.buildPath();
-matrix.buildSequences();
 matrix.printResult();
 
 // matrix.printScoresTable();
