@@ -24,11 +24,16 @@ console.log({ firstLine, secondLine });
 class _Node {
   //   nucleotide: string; // A | T | C | G
   cost: number; // path cost
+  x: number;
+  y: number;
+  from: _Node;
 
   //   constructor(nucleotide: string, cost = 0) {
-  constructor(cost = 0) {
+  constructor(cost = 0, x = 0, y = 0) {
     // this.nucleotide = nucleotide;
     this.cost = cost;
+    this.x = x;
+    this.y = y;
   }
 }
 
@@ -57,40 +62,26 @@ class Matrix {
       matrix.push(new Array(x));
     }
 
+    const startingNode = new _Node();
+    // matrix[0][0] = startingNode;
     matrix[0][0] = 0;
     this.table = matrix;
   }
 
-  initializeMatrix = () => {
-    for (let i = 1; i < this.second.length + 1; i++) {
-      this.table[0][i] = this.second[i - 1];
-    }
-    for (let i = 1; i < this.first.length + 1; i++) {
-      this.table[i][0] = this.first[i - 1];
-    }
-  };
-
-  calculateScores = () => {
-    // calculate score for firs lines
-    for (let i = 1; i < this.second.length + 1; i++) {
-      this.table[0][i] = this.getScore(0, i);
-    }
-    for (let i = 1; i < this.first.length + 1; i++) {
-      this.table[i][0] = this.getScore(i, 0);
-    }
-
-    // calculate score of rest
-    for (let i = 1; i < this.first.length + 1; i++) {
-      for (let j = 1; j < this.first.length; j++) {
-        this.table[i][j] = this.getScore(i, j);
-        // if (i === 1 && j === 1) return;
-      }
-    }
-  };
+  // initializeMatrix = () => {
+  //   for (let i = 1; i < this.second.length + 1; i++) {
+  //     this.table[0][i] = this.second[i - 1];
+  //     console.log(this.second[i - 1]);
+  //   }
+  //   for (let i = 1; i < this.first.length + 1; i++) {
+  //     this.table[i][0] = this.first[i - 1];
+  //   }
+  // };
 
   // get the match, mismatch or affine gap penalty score by checking all inputs
   //   private getScore = (x: number, y: number) => {
-  getScore = (x: number, y: number) => {
+  
+  private getScore = (x: number, y: number) => {
     // console.log({ x, y });
     // check left
     let left: number;
@@ -130,6 +121,24 @@ class Matrix {
     return max;
   };
 
+  calculateScores = () => {
+    // calculate score for firs lines
+    for (let i = 1; i < this.second.length + 1; i++) {
+      this.table[0][i] = this.getScore(0, i);
+    }
+    for (let i = 1; i < this.first.length + 1; i++) {
+      this.table[i][0] = this.getScore(i, 0);
+    }
+
+    // calculate score of rest
+    for (let i = 1; i < this.first.length + 1; i++) {
+      for (let j = 1; j < this.second.length + 1; j++) {
+        this.table[i][j] = this.getScore(i, j);
+        // if (i === 1 && j === 1) return;
+      }
+    }
+  };
+
   printScoresTable = () => {
     const pad = 3; // pad size
     console.log(
@@ -150,8 +159,22 @@ class Matrix {
       console.log(mapped.join(' '));
     }
   };
+
+  getCost = () => {
+    return this.table[this.first.length][this.second.length];
+  };
+
+  // save the table into a file
+  save = () => {
+    fs.writeFileSync(
+      'dump.json',
+      JSON.stringify(this.table).replace(/\],\[/gm, '],\n[')
+    );
+  };
 }
 
-let matrix = new Matrix(firstLine, secondLine);
+const matrix = new Matrix(firstLine, secondLine);
 
 matrix.printScoresTable();
+console.log('Cost:', matrix.getCost());
+matrix.save();
