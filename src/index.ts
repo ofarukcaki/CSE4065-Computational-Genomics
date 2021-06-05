@@ -23,7 +23,7 @@ class _Node {
   cost: number; // path cost
   x: number;
   y: number;
-  from: _Node;
+  from: _Node | null;
 
   //   constructor(nucleotide: string, cost = 0) {
   constructor(cost = 0, x = 0, y = 0) {
@@ -35,16 +35,12 @@ class _Node {
   }
 }
 
-const isNumber = (value) => {
-  return typeof value === 'number' && isFinite(value);
-};
-
 class Matrix {
-  private table: Array<Array<_Node>>;
+  private table: Array<Array<_Node>> | undefined;
   private first: string;
   private second: string;
-  private path: Array<_Node>;
-  private alignedSequences: { first: string; second: string };
+  private path: Array<_Node> | undefined;
+  private alignedSequences: { first: string; second: string } | undefined;
 
   constructor(first: string, second: string) {
     this.first = first;
